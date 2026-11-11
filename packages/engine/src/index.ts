@@ -11,6 +11,7 @@ import { chess } from './games/chess';
 import { doudizhu } from './games/doudizhu';
 import { gemguild } from './games/gemguild';
 import { guandan } from './games/guandan';
+import { hangzhou } from './games/hangzhou';
 import { hexisle } from './games/hexisle';
 import { highcard } from './games/highcard';
 import { onecard } from './games/onecard';
@@ -31,6 +32,8 @@ export * as gg from './games/gemguild';
 export * as ch from './games/chess';
 export * as xq from './games/xiangqi';
 export * as mj from './mahjong';
+export * as hj from './mahjong/honors';
+export * as hz from './games/hangzhou';
 
 export {
   doudizhu,
@@ -44,6 +47,7 @@ export {
   hexisle,
   gemguild,
   highcard,
+  hangzhou,
 };
 
 // 内置玩法（顺序即大厅展示顺序）
@@ -59,5 +63,6 @@ for (const g of [
   hexisle,
   gemguild,
   highcard,
+  hangzhou,
 ])
   registerGame(g);

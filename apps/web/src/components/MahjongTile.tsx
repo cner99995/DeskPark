@@ -2,6 +2,9 @@ import type { mj } from '@park/engine';
 import type { CSSProperties, HTMLAttributes, ReactNode } from 'react';
 import { memo } from 'react';
 
+/** 兼容 108 张（万条筒）与含字牌（东南西北中发白）两种麻将牌 */
+export type MahjongTileLike = { id?: number; suit: string; rank: number };
+
 /**
  * 麻将牌面（矢量绘制，跨平台一致）：
  * 万：上为汉字数字、下为红色「萬」；筒：经典配色的圆饼排布；条：竹节排布，一条为小鸟。
@@ -265,11 +268,60 @@ function WanFace({ rank }: { rank: number }) {
   );
 }
 
-export function TileFace({ tile }: { tile: Pick<mj.Tile, 'suit' | 'rank'> }) {
+const FENG = ['東', '南', '西', '北'];
+const JIAN = ['中', '發', ''];
+
+function HonorFace({ tile }: { tile: MahjongTileLike }) {
+  if (tile.suit === 'feng') {
+    return (
+      <g fontFamily="var(--font-display)" textAnchor="middle" fontWeight="700">
+        <text x={30} y={52} fontSize={36} fill={BLUE}>
+          {FENG[tile.rank - 1]}
+        </text>
+      </g>
+    );
+  }
+  if (tile.rank === 3) {
+    return (
+      <g>
+        <rect
+          x={11}
+          y={16}
+          width={38}
+          height={48}
+          rx={3}
+          fill="none"
+          stroke={BLUE}
+          strokeWidth={3}
+        />
+        <rect
+          x={17}
+          y={22}
+          width={26}
+          height={36}
+          rx={2}
+          fill="none"
+          stroke={BLUE}
+          strokeWidth={1.5}
+        />
+      </g>
+    );
+  }
+  return (
+    <g fontFamily="var(--font-display)" textAnchor="middle" fontWeight="700">
+      <text x={30} y={54} fontSize={38} fill={tile.rank === 1 ? RED : GREEN}>
+        {JIAN[tile.rank - 1]}
+      </text>
+    </g>
+  );
+}
+
+export function TileFace({ tile }: { tile: MahjongTileLike }) {
   let body: ReactNode;
   if (tile.suit === 'wan') body = <WanFace rank={tile.rank} />;
   else if (tile.suit === 'tong') body = <TongFace rank={tile.rank} />;
-  else body = <TiaoFace rank={tile.rank} />;
+  else if (tile.suit === 'tiao') body = <TiaoFace rank={tile.rank} />;
+  else body = <HonorFace tile={tile} />;
   return (
     <svg viewBox="0 0 60 80" className="mjtile__svg" aria-hidden="true">
       {body}
@@ -278,7 +330,7 @@ export function TileFace({ tile }: { tile: Pick<mj.Tile, 'suit' | 'rank'> }) {
 }
 
 export interface MahjongTileProps extends HTMLAttributes<HTMLDivElement> {
-  tile?: Pick<mj.Tile, 'id' | 'suit' | 'rank'> | null;
+  tile?: MahjongTileLike | null;
   w?: string;
   faceDown?: boolean;
   selected?: boolean;
@@ -286,9 +338,19 @@ export interface MahjongTileProps extends HTMLAttributes<HTMLDivElement> {
   highlight?: boolean;
   /** 定缺花色标记 */
   que?: boolean;
+  /** 财神标记（白板） */
+  joker?: boolean;
 }
 
 const SUIT_LABEL: Record<string, string> = { wan: '万', tiao: '条', tong: '筒' };
+const FENG_LABEL = ['东', '南', '西', '北'];
+const JIAN_LABEL = ['中', '发', '白'];
+
+function tileLabel(t: MahjongTileLike): string {
+  if (t.suit === 'feng') return FENG_LABEL[t.rank - 1];
+  if (t.suit === 'jian') return JIAN_LABEL[t.rank - 1];
+  return `${t.rank}${SUIT_LABEL[t.suit]}`;
+}
 
 export const MahjongTile = memo(function MahjongTile({
   tile,
@@ -298,6 +360,7 @@ export const MahjongTile = memo(function MahjongTile({
   dim,
   highlight,
   que,
+  joker,
   className = '',
   style,
   ...rest
@@ -313,10 +376,11 @@ export const MahjongTile = memo(function MahjongTile({
     .filter(Boolean)
     .join(' ');
   const s = { '--w': w, ...style } as CSSProperties;
-  const label = tile && !faceDown ? `${tile.rank}${SUIT_LABEL[tile.suit]}` : '牌背';
+  const label = tile && !faceDown ? tileLabel(tile) : '牌背';
   return (
     <div className={cls} style={s} role="img" aria-label={label} {...rest}>
       {tile && !faceDown && <TileFace tile={tile} />}
+      {joker && tile && !faceDown && <span className="mjtile__joker">财</span>}
       {que && <span className="mjtile__que">缺</span>}
     </div>
   );

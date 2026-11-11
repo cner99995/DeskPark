@@ -1,0 +1,25 @@
+/* 杭州麻将：复用四川麻将的牌桌布局，只补充财神标记等少量样式 */
+
+.mjtile__joker {
+  position: absolute;
+  right: -3px;
+  top: -3px;
+  font-size: max(9px, calc(var(--w) * 0.24));
+  line-height: 1;
+  padding: 2px 3px;
+  border-radius: 4px;
+  background: linear-gradient(180deg, #f3dda6, #c9a25b);
+  color: #3b2a10;
+  font-weight: 700;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.sc-wonbadge {
+  max-width: 15ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sc-res-status .mini-tag {
+  margin-right: 2px;
+}
